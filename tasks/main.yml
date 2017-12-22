@@ -1,0 +1,69 @@
+---
+# we are deliberately calling apt/pacman/yum here because package is dog-slow
+# for now and only installs/updates one package at a time
+- name: Handle Debian based distributions
+  block:
+    - name: Update package cache and install packages (Debian)
+      apt:
+        name: "{{ item }}"
+        update_cache: "{{ update_cache }}"
+      with_items: "{{ packages[ansible_distribution] }}"
+      when: packages[ansible_distribution] is defined
+    - name: Remove unwanted packages
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: "{{ apt_purge }}"
+      with_items: "{{ packages_remove[ansible_distribution] }}"
+      when: packages_remove[ansible_distribution] is defined
+  become: True
+  when: ansible_distribution in ('Debian', 'Ubuntu')
+
+- name: Handle ArchLinux based distributions
+  block:
+    - name: Update package cache and install packages (Arch Linux)
+      pacman:
+        name: "{{ item }}"
+        update_cache: "{{ update_cache }}"
+      with_items: "{{ packages[ansible_distribution] }}"
+      when: packages[ansible_distribution] is defined
+    - name: Remove unwanted packages
+      pacman:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ packages_remove[ansible_distribution] }}"
+      when: packages_remove[ansible_distribution] is defined
+  become: True
+  when: ansible_distribution in ('Arch Linux')
+
+- name: Handle RedHat based distributions
+  block:
+    - name: Install packages (RedHat)
+      yum:
+        name: "{{ item }}"
+      with_items: "{{ packages[ansible_distribution] }}"
+      when: packages[ansible_distribution] is defined
+    - name: Remove unwanted packages
+      yum:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ packages_remove[ansible_distribution] }}"
+      when: packages_remove[ansible_distribution] is defined
+  become: True
+  when: ansible_distribution in ('Red Hat Enterprise Linux', 'CentOS')
+
+- name: Handle Fedora based distributions
+  block:
+    - name: Install packages (Fedora)
+      dnf:
+        name: "{{ item }}"
+      with_items: "{{ packages[ansible_distribution] }}"
+      when: packages[ansible_distribution] is defined
+    - name: Remove unwanted packages
+      dnf:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ packages_remove[ansible_distribution] }}"
+      when: packages_remove[ansible_distribution] is defined
+  become: True
+  when: ansible_distribution in ('Fedora')
