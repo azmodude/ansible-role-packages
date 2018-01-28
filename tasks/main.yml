@@ -3,6 +3,14 @@
 # for now and only installs/updates one package at a time
 - name: Handle Debian based distributions
   block:
+    - name: Install extra PPAs (Ubuntu)
+      block:
+        - name: Install extra PPAs (Ubuntu)
+          apt_repository:
+            repo: "ppa:{{ item }}"
+          with_items: "{{ packages.ppas }}"
+      become: True
+      when: ansible_distribution in ('Ubuntu') and packages.ppas is defined
     - name: Update package cache and install packages (Debian)
       apt:
         name: "{{ item }}"
@@ -21,7 +29,7 @@
 
 - name: Handle ArchLinux based distributions
   block:
-    - name: Update package cache and install packages (Arch Linux)
+    - name: Update package cache and install packages (Archlinux)
       pacman:
         name: "{{ item }}"
         update_cache: "{{ update_cache }}"
@@ -34,7 +42,7 @@
       with_items: "{{ packages_remove[ansible_distribution] }}"
       when: packages_remove[ansible_distribution] is defined
   become: True
-  when: ansible_distribution in ('Arch Linux')
+  when: ansible_distribution in ('Archlinux')
 
 - name: Handle RedHat based distributions
   block:
