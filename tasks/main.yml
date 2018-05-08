@@ -15,7 +15,9 @@
       apt:
         name: "{{ item }}"
         update_cache: "{{ update_cache }}"
-      with_items: "{{ packages[ansible_distribution] }}"
+      with_items:
+        - "{{ group_packages[ansible_distribution] }}"
+        - "{{ packages[ansible_distribution] }}"
       when: packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       apt:
@@ -33,7 +35,9 @@
       pacman:
         name: "{{ item }}"
         update_cache: "{{ update_cache }}"
-      with_items: "{{ packages[ansible_distribution] }}"
+      with_items:
+        - "{{ group_packages[ansible_distribution] }}"
+        - "{{ packages[ansible_distribution] }}"
       when: packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       pacman:
@@ -49,7 +53,9 @@
     - name: Install packages (RedHat)
       yum:
         name: "{{ item }}"
-      with_items: "{{ packages[ansible_distribution] }}"
+      with_items:
+        - "{{ group_packages[ansible_distribution] }}"
+        - "{{ packages[ansible_distribution] }}"
       when: packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       yum:
@@ -65,7 +71,9 @@
     - name: Install packages (Fedora)
       dnf:
         name: "{{ item }}"
-      with_items: "{{ packages[ansible_distribution] }}"
+      with_items:
+        - "{{ group_packages[ansible_distribution] }}"
+        - "{{ packages[ansible_distribution] }}"
       when: packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       dnf:
