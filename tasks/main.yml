@@ -17,14 +17,14 @@
         update_cache: "{{ update_cache }}"
       with_items:
         - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages[ansible_distribution] is defined
+      when: group_packages is defined and group_packages[ansible_distribution] is defined
     - name: Update package cache and install packages (Debian)
       apt:
         name: "{{ item }}"
         update_cache: "{{ update_cache }}"
       with_items:
         - "{{ packages[ansible_distribution] }}"
-      when: packages[ansible_distribution] is defined
+      when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       apt:
         name: "{{ item }}"
@@ -43,14 +43,14 @@
         update_cache: "{{ update_cache }}"
       with_items:
         - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages[ansible_distribution] is defined
+      when: group_packages is defined and group_packages[ansible_distribution] is defined
     - name: Update package cache and install packages (Archlinux)
       pacman:
         name: "{{ item }}"
         update_cache: "{{ update_cache }}"
       with_items:
         - "{{ packages[ansible_distribution] }}"
-      when: packages[ansible_distribution] is defined
+      when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       pacman:
         name: "{{ item }}"
@@ -67,13 +67,13 @@
         name: "{{ item }}"
       with_items:
         - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages[ansible_distribution] is defined
+      when: group_packages is defined and group_packages[ansible_distribution] is defined
     - name: Install packages (RedHat)
       yum:
         name: "{{ item }}"
       with_items:
         - "{{ packages[ansible_distribution] }}"
-      when: packages[ansible_distribution] is defined
+      when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       yum:
         name: "{{ item }}"
@@ -90,13 +90,13 @@
         name: "{{ item }}"
       with_items:
         - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages[ansible_distribution] is defined
+      when: group_packages is defined and group_packages[ansible_distribution] is defined
     - name: Install packages (Fedora)
       dnf:
         name: "{{ item }}"
       with_items:
         - "{{ packages[ansible_distribution] }}"
-      when: packages[ansible_distribution] is defined
+      when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       dnf:
         name: "{{ item }}"
