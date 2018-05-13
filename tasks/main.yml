@@ -10,7 +10,7 @@
             repo: "ppa:{{ item }}"
           with_items: "{{ packages.ppas }}"
       become: True
-      when: ansible_distribution in ('Ubuntu') and packages.ppas is defined
+      when: ansible_distribution in ('Ubuntu') and packages is defined and packages.ppas is defined
     - name: Update package cache and install group packages (Debian)
       apt:
         name: "{{ item }}"
