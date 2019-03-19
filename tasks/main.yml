@@ -13,24 +13,19 @@
       when: ansible_distribution in ('Ubuntu') and packages is defined and packages.ppas is defined
     - name: Update package cache and install group packages (Debian)
       apt:
-        name: "{{ item }}"
+        name: "{{ packages_group[ansible_distribution] }}"
         update_cache: "{{ update_cache }}"
-      with_items:
-        - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages is defined and group_packages[ansible_distribution] is defined
-    - name: Update package cache and install packages (Debian)
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: Update package cache and host packages (Debian)
       apt:
-        name: "{{ item }}"
+        name: "{{ packages[ansible_distribution] }}"
         update_cache: "{{ update_cache }}"
-      with_items:
-        - "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       apt:
-        name: "{{ item }}"
+        name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
         purge: "{{ apt_purge }}"
-      with_items: "{{ packages_remove[ansible_distribution] }}"
       when: packages_remove[ansible_distribution] is defined
   become: True
   when: ansible_distribution in ('Debian', 'Ubuntu')
@@ -39,23 +34,18 @@
   block:
     - name: Update package cache and install group packages (Archlinux)
       pacman:
-        name: "{{ item }}"
+        name: "{{ packages_group[ansible_distribution] }}"
         update_cache: "{{ update_cache }}"
-      with_items:
-        - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages is defined and group_packages[ansible_distribution] is defined
-    - name: Update package cache and install packages (Archlinux)
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: Update package cache and host packages (Archlinux)
       pacman:
-        name: "{{ item }}"
+        name: "{{ packages[ansible_distribution] }}"
         update_cache: "{{ update_cache }}"
-      with_items:
-        - "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       pacman:
-        name: "{{ item }}"
+        name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
-      with_items: "{{ packages_remove[ansible_distribution] }}"
       when: packages_remove[ansible_distribution] is defined
   become: True
   when: ansible_distribution in ('Archlinux')
@@ -64,21 +54,16 @@
   block:
     - name: Install group packages (RedHat)
       yum:
-        name: "{{ item }}"
-      with_items:
-        - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages is defined and group_packages[ansible_distribution] is defined
-    - name: Install packages (RedHat)
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: host packages (RedHat)
       yum:
-        name: "{{ item }}"
-      with_items:
-        - "{{ packages[ansible_distribution] }}"
+        name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       yum:
-        name: "{{ item }}"
+        name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
-      with_items: "{{ packages_remove[ansible_distribution] }}"
       when: packages_remove[ansible_distribution] is defined
   become: True
   when: ansible_distribution in ('Red Hat Enterprise Linux', 'CentOS')
@@ -87,21 +72,16 @@
   block:
     - name: Install group packages (Fedora)
       dnf:
-        name: "{{ item }}"
-      with_items:
-        - "{{ group_packages[ansible_distribution] }}"
-      when: group_packages is defined and group_packages[ansible_distribution] is defined
-    - name: Install packages (Fedora)
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: host packages (Fedora)
       dnf:
-        name: "{{ item }}"
-      with_items:
-        - "{{ packages[ansible_distribution] }}"
+        name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       dnf:
-        name: "{{ item }}"
+        name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
-      with_items: "{{ packages_remove[ansible_distribution] }}"
       when: packages_remove[ansible_distribution] is defined
   become: True
   when: ansible_distribution in ('Fedora')
