@@ -14,12 +14,10 @@
     - name: Update package cache and install group packages (Debian)
       apt:
         name: "{{ packages_group[ansible_distribution] }}"
-        update_cache: "{{ update_cache }}"
       when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Update package cache and host packages (Debian)
+    - name: Update package cache and install host packages (Debian)
       apt:
         name: "{{ packages[ansible_distribution] }}"
-        update_cache: "{{ update_cache }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       apt:
@@ -35,12 +33,10 @@
     - name: Update package cache and install group packages (Archlinux)
       pacman:
         name: "{{ packages_group[ansible_distribution] }}"
-        update_cache: "{{ update_cache }}"
       when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Update package cache and host packages (Archlinux)
+    - name: Update package cache and install host packages (Archlinux)
       pacman:
         name: "{{ packages[ansible_distribution] }}"
-        update_cache: "{{ update_cache }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Remove unwanted packages
       pacman:
@@ -56,7 +52,7 @@
       yum:
         name: "{{ packages_group[ansible_distribution] }}"
       when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: host packages (RedHat)
+    - name: Install host packages (RedHat)
       yum:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
@@ -74,7 +70,7 @@
       dnf:
         name: "{{ packages_group[ansible_distribution] }}"
       when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: host packages (Fedora)
+    - name: Install host packages (Fedora)
       dnf:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
