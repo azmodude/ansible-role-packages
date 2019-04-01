@@ -11,11 +11,11 @@
           with_items: "{{ packages.ppas }}"
       become: True
       when: ansible_distribution in ('Ubuntu') and packages is defined and packages.ppas is defined
-    - name: Update package cache and install group packages (Debian)
+    - name: Install group packages (Debian)
       apt:
         name: "{{ packages_group[ansible_distribution] }}"
       when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Update package cache and install host packages (Debian)
+    - name: Install host packages (Debian)
       apt:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
@@ -30,11 +30,11 @@
 
 - name: Handle ArchLinux based distributions
   block:
-    - name: Update package cache and install group packages (Archlinux)
+    - name: Install group packages (Archlinux)
       pacman:
         name: "{{ packages_group[ansible_distribution] }}"
       when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Update package cache and install host packages (Archlinux)
+    - name: Install host packages (Archlinux)
       pacman:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
