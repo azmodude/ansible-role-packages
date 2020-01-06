@@ -9,7 +9,7 @@
           apt_repository:
             repo: "ppa:{{ item }}"
           with_items: "{{ packages.ppas }}"
-      become: True
+      become: true
       when: ansible_distribution in ('Ubuntu') and packages is defined and packages.ppas is defined
     - name: Install group packages (Debian)
       apt:
@@ -19,13 +19,27 @@
       apt:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
-    - name: Remove unwanted packages
+    - name: Install group snaps (Debian)
+      snap:
+        name: "{{ item.name }}"
+        state: present
+        classic: "{{ item.classic | default(false) }}"
+      with_items:
+        - "{{ snaps_group | default([]) }}"
+    - name: Install host snaps (Debian)
+      snap:
+        name: "{{ item.name }}"
+        state: present
+        classic: "{{ item.classic | default(false) }}"
+      with_items:
+        - "{{ snaps | default([]) }}"
+    - name: Remove unwanted packages (Debian)
       apt:
         name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
         purge: "{{ apt_purge }}"
       when: packages_remove[ansible_distribution] is defined
-  become: True
+  become: true
   when: ansible_distribution in ('Debian', 'Ubuntu')
 
 - name: Handle ArchLinux based distributions
@@ -38,12 +52,12 @@
       pacman:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
-    - name: Remove unwanted packages
+    - name: Remove unwanted packages (Archlinux)
       pacman:
         name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
       when: packages_remove[ansible_distribution] is defined
-  become: True
+  become: true
   when: ansible_distribution in ('Archlinux')
 
 - name: Handle RedHat based distributions
@@ -56,12 +70,12 @@
       yum:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
-    - name: Remove unwanted packages
+    - name: Remove unwanted packages (RedHat)
       yum:
         name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
       when: packages_remove[ansible_distribution] is defined
-  become: True
+  become: true
   when: ansible_distribution in ('Red Hat Enterprise Linux', 'CentOS')
 
 - name: Handle Fedora based distributions
@@ -74,10 +88,10 @@
       dnf:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
-    - name: Remove unwanted packages
+    - name: Remove unwanted packages (Fedora)
       dnf:
         name: "{{ packages_remove[ansible_distribution] }}"
         state: absent
       when: packages_remove[ansible_distribution] is defined
-  become: True
+  become: true
   when: ansible_distribution in ('Fedora')
