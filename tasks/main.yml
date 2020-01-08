@@ -52,6 +52,35 @@
       pacman:
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
+    - name: Create AUR Builder user (Archlinux)
+      block:
+        - name: Create AUR Builder user
+          user:
+            name: "{{ aur_user | default('aur_builder') }}"
+            group: wheel
+            system: true
+        - name: Let AUR Builder user invoke pacman without sudo password
+          lineinfile:
+            path: /etc/sudoers.d/11-install-aur_builder
+            line: "{{ aur_user | default('aur_builder') }} ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+            create: yes
+            validate: 'visudo -cf %s'
+      become: true
+      when: packages_group.AUR is defined
+    - name: Install AUR group packages (Archlinux)
+      aur:
+        name: "{{ item }}"
+      loop: "{{ packages_group.AUR }}"
+      become: true
+      become_user: "{{ aur_user | default('aur_builder') }}"
+      when: packages_group.AUR is defined
+    - name: Install AUR host packages (Archlinux)
+      aur:
+        name: "{{ item }}"
+      loop: "{{ packages_host.AUR }}"
+      become: true
+      become_user: "{{ aur_user | default('aur_builder') }}"
+      when: packages_host.AUR is defined
     - name: Remove unwanted packages (Archlinux)
       pacman:
         name: "{{ packages_remove[ansible_distribution] }}"
