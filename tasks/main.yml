@@ -20,17 +20,19 @@
         name: "{{ packages[ansible_distribution] }}"
       when: packages is defined and packages[ansible_distribution] is defined
     - name: Install group snaps (Debian)
-      snap:
+      community.general.snap:
         name: "{{ item.name }}"
         state: present
         classic: "{{ item.classic | default(false) }}"
+        channel: "{{ item.channel | default('stable') }}"
       with_items:
         - "{{ snaps_group | default([]) }}"
     - name: Install host snaps (Debian)
-      snap:
+      community.general.snap:
         name: "{{ item.name }}"
         state: present
         classic: "{{ item.classic | default(false) }}"
+        channel: "{{ item.channel | default('stable') }}"
       with_items:
         - "{{ snaps | default([]) }}"
     - name: Remove unwanted packages (Debian)
