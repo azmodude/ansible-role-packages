@@ -44,6 +44,34 @@
   become: true
   when: ansible_distribution in ('Debian', 'Ubuntu')
 
+- name: Handle SuSE based distributions
+  block:
+    - name: Install group packages (SuSE)
+      community.general.zypper:
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: Install host packages (SuSE)
+      community.general.zypper:
+        name: "{{ packages[ansible_distribution] }}"
+      when: packages is defined and packages[ansible_distribution] is defined
+    - name: Install group patterns (SuSE)
+      community.general.zypper:
+        name: "{{ patterns_group[ansible_distribution] }}"
+        type: pattern
+      when: patterns_group is defined and patterns_group[ansible_distribution] is defined
+    - name: Install host patterns (SuSE)
+      community.general.zypper:
+        name: "{{ patterns[ansible_distribution] }}"
+        type: pattern
+      when: patterns is defined and patterns[ansible_distribution] is defined
+    - name: Remove unwanted packages (SuSE)
+      community.general.zypper:
+        name: "{{ packages_remove[ansible_distribution] }}"
+        state: absent
+      when: packages_remove[ansible_distribution] is defined
+  become: true
+  when: ansible_distribution in ('openSUSE Tumbleweed', 'openSUSE Leap')
+
 - name: Handle ArchLinux based distributions
   block:
     - name: Install group packages (Archlinux)
