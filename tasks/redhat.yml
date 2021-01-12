@@ -1,0 +1,32 @@
+---
+- name: Handle RedHat based distributions
+  block:
+    - name: Install group packages (RedHat)
+      yum:
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: Install host packages (RedHat)
+      yum:
+        name: "{{ packages[ansible_distribution] }}"
+      when: packages is defined and packages[ansible_distribution] is defined
+    - name: Remove unwanted packages (RedHat)
+      yum:
+        name: "{{ packages_remove[ansible_distribution] }}"
+        state: absent
+      when: packages_remove[ansible_distribution] is defined
+
+- name: Handle Fedora based distributions
+  block:
+    - name: Install group packages (Fedora)
+      dnf:
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: Install host packages (Fedora)
+      dnf:
+        name: "{{ packages[ansible_distribution] }}"
+      when: packages is defined and packages[ansible_distribution] is defined
+    - name: Remove unwanted packages (Fedora)
+      dnf:
+        name: "{{ packages_remove[ansible_distribution] }}"
+        state: absent
+      when: packages_remove[ansible_distribution] is defined

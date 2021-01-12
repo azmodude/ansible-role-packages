@@ -1,0 +1,40 @@
+---
+- name: Handle Debian based distributions
+  block:
+    - name: Ubuntu | Install extra PPAs
+      block:
+        - name: Ubuntu | Install extra PPAs
+          apt_repository:
+            repo: "ppa:{{ item }}"
+          with_items: "{{ packages.ppas }}"
+      when: ansible_distribution in ('Ubuntu') and packages is defined and packages.ppas is defined
+    - name: Debian | Install group packages
+      apt:
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: Debian | Install host packages
+      apt:
+        name: "{{ packages[ansible_distribution] }}"
+      when: packages is defined and packages[ansible_distribution] is defined
+    - name: Debian | Install group snaps
+      snap:
+        name: "{{ item.name }}"
+        state: present
+        classic: "{{ item.classic | default(false) }}"
+        channel: "{{ item.channel | default('stable') }}"
+      with_items:
+        - "{{ snaps_group | default([]) }}"
+    - name: Debian | Install host snaps
+      snap:
+        name: "{{ item.name }}"
+        state: present
+        classic: "{{ item.classic | default(false) }}"
+        channel: "{{ item.channel | default('stable') }}"
+      with_items:
+        - "{{ snaps | default([]) }}"
+    - name: Debian | Remove unwanted packages
+      apt:
+        name: "{{ packages_remove[ansible_distribution] }}"
+        state: absent
+        purge: "{{ apt_purge }}"
+      when: packages_remove[ansible_distribution] is defined

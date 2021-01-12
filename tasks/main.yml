@@ -1,156 +1,17 @@
 ---
-# we are deliberately calling apt/pacman/yum here because package is dog-slow
-# for now and only installs/updates one package at a time
-- name: Handle Debian based distributions
+- name: Include distribution specific tasks
   block:
-    - name: Install extra PPAs (Ubuntu)
-      block:
-        - name: Install extra PPAs (Ubuntu)
-          apt_repository:
-            repo: "ppa:{{ item }}"
-          with_items: "{{ packages.ppas }}"
-      become: true
-      when: ansible_distribution in ('Ubuntu') and packages is defined and packages.ppas is defined
-    - name: Install group packages (Debian)
-      apt:
-        name: "{{ packages_group[ansible_distribution] }}"
-      when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Install host packages (Debian)
-      apt:
-        name: "{{ packages[ansible_distribution] }}"
-      when: packages is defined and packages[ansible_distribution] is defined
-    - name: Install group snaps (Debian)
-      snap:
-        name: "{{ item.name }}"
-        state: present
-        classic: "{{ item.classic | default(false) }}"
-        channel: "{{ item.channel | default('stable') }}"
-      with_items:
-        - "{{ snaps_group | default([]) }}"
-    - name: Install host snaps (Debian)
-      snap:
-        name: "{{ item.name }}"
-        state: present
-        classic: "{{ item.classic | default(false) }}"
-        channel: "{{ item.channel | default('stable') }}"
-      with_items:
-        - "{{ snaps | default([]) }}"
-    - name: Remove unwanted packages (Debian)
-      apt:
-        name: "{{ packages_remove[ansible_distribution] }}"
-        state: absent
-        purge: "{{ apt_purge }}"
-      when: packages_remove[ansible_distribution] is defined
+    - name: Debian | Include distribution specific tasks
+      include_tasks: debian.yml
+      when: ansible_distribution in ('Debian', 'Ubuntu')
+    - name: SUSE | Include distribution specific tasks
+      include_tasks: suse.yml
+      when: ansible_distribution in ('openSUSE Tumbleweed', 'openSUSE Leap')
+    - name: SUSE | Include distribution specific tasks
+      include_tasks: archlinux.yml
+      when: ansible_distribution in ('Archlinux')
+    - name: RedHat | Include distribution specific tasks
+      include_tasks: redhat.yml
+      when: ansible_distribution in ('Fedora', 'Red Hat Enterprise Linux', 'CentOS')
   become: true
-  when: ansible_distribution in ('Debian', 'Ubuntu')
 
-- name: Handle SUSE based distributions
-  block:
-    - name: Install group packages (SUSE)
-      zypper:
-        name: "{{ packages_group[ansible_distribution] }}"
-      when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Install host packages (SUSE)
-      zypper:
-        name: "{{ packages[ansible_distribution] }}"
-      when: packages is defined and packages[ansible_distribution] is defined
-    - name: Install group patterns (SUSE)
-      zypper:
-        name: "{{ patterns_group[ansible_distribution] }}"
-        type: pattern
-      when: patterns_group is defined and patterns_group[ansible_distribution] is defined
-    - name: Install host patterns (SUSE)
-      zypper:
-        name: "{{ patterns[ansible_distribution] }}"
-        type: pattern
-      when: patterns is defined and patterns[ansible_distribution] is defined
-    - name: Remove unwanted packages (SUSE)
-      zypper:
-        name: "{{ packages_remove[ansible_distribution] }}"
-        state: absent
-      when: packages_remove[ansible_distribution] is defined
-  become: true
-  when: ansible_distribution in ('openSUSE Tumbleweed', 'openSUSE Leap')
-
-- name: Handle ArchLinux based distributions
-  block:
-    - name: Install group packages (Archlinux)
-      pacman:
-        name: "{{ packages_group[ansible_distribution] }}"
-      when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Install host packages (Archlinux)
-      pacman:
-        name: "{{ packages[ansible_distribution] }}"
-      when: packages is defined and packages[ansible_distribution] is defined
-    - name: Create AUR Builder user (Archlinux)
-      block:
-        - name: Create AUR Builder user
-          user:
-            name: "{{ aur_user | default('aur_builder') }}"
-            group: wheel
-            system: true
-        - name: Let AUR Builder user invoke pacman without sudo password
-          lineinfile:
-            path: /etc/sudoers.d/11-install-aur_builder
-            line: "{{ aur_user | default('aur_builder') }} ALL=(ALL) NOPASSWD: /usr/bin/pacman"
-            create: true
-            validate: "visudo -cf %s"
-      become: true
-      when: packages_group.AUR is defined or packages.AUR is defined
-    - name: Install AUR group packages (Archlinux)
-      aur:
-        name: "{{ item }}"
-      loop: "{{ packages_group.AUR }}"
-      become: true
-      become_user: "{{ aur_user | default('aur_builder') }}"
-      when: packages_group.AUR is defined
-    - name: Install AUR host packages (Archlinux)
-      aur:
-        name: "{{ item }}"
-      loop: "{{ packages.AUR }}"
-      become: true
-      become_user: "{{ aur_user | default('aur_builder') }}"
-      when: packages.AUR is defined
-    - name: Remove unwanted packages (Archlinux)
-      pacman:
-        name: "{{ packages_remove[ansible_distribution] }}"
-        state: absent
-      when: packages_remove[ansible_distribution] is defined
-  become: true
-  when: ansible_distribution in ('Archlinux')
-
-- name: Handle RedHat based distributions
-  block:
-    - name: Install group packages (RedHat)
-      yum:
-        name: "{{ packages_group[ansible_distribution] }}"
-      when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Install host packages (RedHat)
-      yum:
-        name: "{{ packages[ansible_distribution] }}"
-      when: packages is defined and packages[ansible_distribution] is defined
-    - name: Remove unwanted packages (RedHat)
-      yum:
-        name: "{{ packages_remove[ansible_distribution] }}"
-        state: absent
-      when: packages_remove[ansible_distribution] is defined
-  become: true
-  when: ansible_distribution in ('Red Hat Enterprise Linux', 'CentOS')
-
-- name: Handle Fedora based distributions
-  block:
-    - name: Install group packages (Fedora)
-      dnf:
-        name: "{{ packages_group[ansible_distribution] }}"
-      when: packages_group is defined and packages_group[ansible_distribution] is defined
-    - name: Install host packages (Fedora)
-      dnf:
-        name: "{{ packages[ansible_distribution] }}"
-      when: packages is defined and packages[ansible_distribution] is defined
-    - name: Remove unwanted packages (Fedora)
-      dnf:
-        name: "{{ packages_remove[ansible_distribution] }}"
-        state: absent
-      when: packages_remove[ansible_distribution] is defined
-  become: true
-  when: ansible_distribution in ('Fedora')

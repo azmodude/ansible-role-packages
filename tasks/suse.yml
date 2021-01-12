@@ -1,0 +1,41 @@
+---
+- name: Handle SUSE based distributions
+  block:
+    - name: SUSE | Add RPM keys
+      rpm_key:
+        key: "{{ item.key | default(omit) }}"
+        state: present
+      loop: "{{ packages.repositories }}"
+      when: packages is defined and packages.repositories is defined and item.key is defined
+    - name: SUSE | Add extra repositories
+      zypper_repository:
+        repo: "{{ item.repo }}"
+        auto_import_keys: "{{ item.auto_import_keys | default(true) }}"
+        description: "{{ item.description | default(omit) }}"
+        priority: "{{ item.priority | default(omit) }}"
+        name: "{{ item.name | default(omit) }}"
+      loop: "{{ packages.repositories }}"
+      when: packages is defined and packages.repositories is defined
+    - name: SUSE | Install group packages
+      zypper:
+        name: "{{ packages_group[ansible_distribution] }}"
+      when: packages_group is defined and packages_group[ansible_distribution] is defined
+    - name: SUSE | Install host packages
+      zypper:
+        name: "{{ packages[ansible_distribution] }}"
+      when: packages is defined and packages[ansible_distribution] is defined
+    - name: SUSE | Install group patterns
+      zypper:
+        name: "{{ patterns_group[ansible_distribution] }}"
+        type: pattern
+      when: patterns_group is defined and patterns_group[ansible_distribution] is defined
+    - name: SUSE | Install host patterns
+      zypper:
+        name: "{{ patterns[ansible_distribution] }}"
+        type: pattern
+      when: patterns is defined and patterns[ansible_distribution] is defined
+    - name: SUSE | Remove unwanted packages
+      zypper:
+        name: "{{ packages_remove[ansible_distribution] }}"
+        state: absent
+      when: packages_remove[ansible_distribution] is defined
