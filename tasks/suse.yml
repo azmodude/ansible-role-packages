@@ -13,6 +13,7 @@
         auto_import_keys: "{{ item.auto_import_keys | default(true) }}"
         description: "{{ item.description | default(omit) }}"
         priority: "{{ item.priority | default(omit) }}"
+        overwrite_multiple: "{{ item.overwrite_multiple | default(true) }}"
         name: "{{ item.name | default(omit) }}"
       loop: "{{ packages.repositories }}"
       when: packages is defined and packages.repositories is defined
