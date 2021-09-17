@@ -25,14 +25,14 @@
       become: true
       when: packages_group.AUR is defined or packages.AUR is defined
     - name: Archlinux | Install AUR group packages
-      aur:
+      kewlfft.aur.aur:
         name: "{{ item }}"
       loop: "{{ packages_group.AUR }}"
       become: true
       become_user: "{{ aur_user | default('aur_builder') }}"
       when: packages_group.AUR is defined
     - name: Archlinux | Install AUR host packages
-      aur:
+      kewlfft.aur.aur:
         name: "{{ item }}"
       loop: "{{ packages.AUR }}"
       become: true
